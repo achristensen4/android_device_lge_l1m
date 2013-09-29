@@ -127,9 +127,6 @@ TARGET_FORCE_CPU_UPLOAD := true
 # Preload bootanimation
 TARGET_BOOTANIMATION_PRELOAD := true
 
-# Vold
-TARGET_USE_CUSTOM_LUN_FILE_PATH := /sys/devices/platform/msm_hsusb/gadget/lun0/file
-
 # Loki
 #TARGET_RELEASETOOLS_EXTENSIONS := device/lge/msm8960-common/loki
  

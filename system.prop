@@ -7,24 +7,24 @@ wlan.chip.version=bcm4334
 wifi.interface=wlan0
 wlan.driver.status=ok
 
-wifi.supplicant_scan_interval=90
-wifi.supplicant_no_update_ctrl=true
-dalvik.vm.dexopt-data-only=1
+wifi.supplicant_scan_interval=16
+wifi.supplicant_no_update_ctrl=false
+dalvik.vm.dexopt-data-only=0
 com.qc.hardware=true
 
 # RIL properties
 rild.libpath=/system/lib/libril-qc-qmi-1.so
 ro.telephony.ril_class=LGEQualcommUiccRIL
-keyguard.no_require_sim=true
+keyguard.no_require_sim=false
 rild.libargs=-d /dev/smd0
 ro.baseband.arch=msm
 ro.telephony.ril.v3=subscriptionFromSource,skipCdmaSubcription
-ro.telephony.default_network=7
-ro.ril.def.preferred.network=7
-telephony.lteOnCdmaDevice=1
+ro.telephony.default_network=4
+ro.ril.def.preferred.network=4
+telephony.lteOnCdmaDevice=0
 telephony.lte.cdma.device=1
 ro.cdma.subscribe_on_ruim_ready=true
-persist.radio.no_wait_for_card=1
+persist.radio.no_wait_for_card=0
 
 ro.config.svlte1x=true
 
@@ -50,7 +50,7 @@ ro.sf.compbypass.enable=1
 dev.pm.dyn_samplingrate=1
 
 # LPA Mode ON
-lpa.decode=false
+lpa.decode=true
 lpa.use-stagefright=true
 
 # system props for the MM modules
@@ -68,9 +68,9 @@ ro.use_data_netmgrd=true
 persist.timed.enable=true
 
 # System props for audio
-persist.audio.fluence.mode=endfire
-persist.audio.vr.enable=false
-persist.audio.handset.mic=analog
+persist.audio.fluence.mode=fluence
+persist.audio.vr.enable=true
+persist.audio.handset.mic=digital
 
 # System prop to select audio resampler quality
 af.resampler.quality=255
@@ -79,12 +79,12 @@ af.resampler.quality=255
 ro.opengles.version=131072
 
 # system prop for Bluetooth
-ro.qualcomm.bluetooth.dun=false
-ro.qualcomm.bluetooth.sap=false
+ro.qualcomm.bluetooth.dun=true
+ro.qualcomm.bluetooth.sap=true
 ro.qualcomm.bluetooth.ftp=true
 ro.bluetooth.hfp.ver=1.6
 ro.qualcomm.bt.hci_transport=smd
-ro.bluetooth.request.master=false
+ro.bluetooth.request.master=true
 ro.bluetooth.remote.autoconnect=true
 
 #system prop for switching gps driver to qmi
@@ -112,13 +112,13 @@ wifi.lge.sleeppolicy=0
 wifi.lge.offdelay=true
 persist.data_netmgrd_mtu=1428
 persist.service.ecc.hiddenmenu=
-ro.setupwizard.mode=DISABLED
-ro.livewallpaper.map=DISABLED
+ro.setupwizard.mode=ENABLED
+ro.livewallpaper.map=ENABLED
 ro.com.google.apphider=off
 drm.service.enabled=true
 ro.sf.lcd_density=240
-ro.hdmi.enable=false
-dhcp.dlna.using=false
+ro.hdmi.enable=true
+dhcp.dlna.using=true
 ro.config.vc_call_vol_steps=8
 ro.config.vc_call_vol_default=6
 ro.cdma.voicemail.number=mine
@@ -133,14 +133,14 @@ ro.qualcomm.bt.hci_transport=smd
 # system prop for requesting Master role in incoming Bluetooth connection.
 #
 #ro.bluetooth.request.master=true
-ro.bluetooth.request.master=false
+ro.bluetooth.request.master=true
 #
 # system prop for Bluetooth Auto connect for remote initated connections
 #
 ro.bluetooth.remote.autoconnect=true
 # system property for Bluetooth discoverability time out in seconds
 # 0: Always discoverable
-#debug.bt.discoverable_time=0
+debug.bt.discoverable_time=0
 
 #system prop for switching gps driver to qmi
 persist.gps.qmienabled=true

@@ -5,7 +5,6 @@ import init.ckerror.rc
 # CAPP_UNINSTALL_PRELOADED
 ########################################
 service post_install /system/vendor/bin/post_install.sh
-    disabled
     oneshot
 
 on property:sys.boot_completed=1
@@ -17,7 +16,6 @@ on property:sys.boot_completed=1
 service shutdownanim /system/bin/shutdownanimation
     user graphics
     group graphics system
-    disabled
     oneshot
 
 ########################################
@@ -51,7 +49,7 @@ on post-fs-data
 
 #CAPP_RESERVED_USERDATA
 on property:ro.reserve.blockcount=*
-    exec /system/bin/tune2fs -r $ro.reserve.blockcount \
+    exec /system/bin/tune2fs -r $ro.reserve.blockcount
               -u system -g system $ro.reserve.userdata
 
 #CAPP_BLUEERROR_HANDLER: temp version, it will be removed 
@@ -61,7 +59,7 @@ on post-fs-data
 
 # CAPP_NFS
 service nfsserversetup /system/bin/nfsserversetup
-    class late_start
+    class main
     user root
     oneshot
 # CAPP_NFS_END

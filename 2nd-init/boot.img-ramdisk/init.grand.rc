@@ -35,7 +35,7 @@ on early-boot
     setrlimit 8 67108864 67108864
 
 on boot
-#    exec system/bin/btnvtool -O	# LGE_CHANGE [blue.park@lge.com] <It is only used by eng mode>
+    exec system/bin/btnvtool -O	# LGE_CHANGE [blue.park@lge.com] <It is only used by eng mode>
     chown bluetooth bluetooth /sys/module/bluetooth_power/parameters/power
     chown bluetooth bluetooth /sys/class/rfkill/rfkill0/type
     chown bluetooth bluetooth /sys/class/rfkill/rfkill0/state
@@ -83,15 +83,15 @@ on boot
     setprop service.brcm.bt.activation 0
     setprop service.brcm.bt.srv_active 0
     setprop service.brcm.bt.hcid_active 0  
-#   setprop ro.bluetooth.PANenable 1    
+    setprop ro.bluetooth.PANenable 1    
 #END: 0019636 chanha.park@lge.com 2012-06-11
 # LGE_BT_S: [ADD] chanha.park '12-08-26 - [F200][BT] Support BT WBS...
     setprop service.brcm.bt.wbs 1	
 # LGE_BT_E	
     
     #Set SUID bit for usbhub
-    #chmod 4755 /system/bin/usbhub
-    #chmod 755 /system/bin/usbhub_init
+    chmod 4755 /system/bin/usbhub
+    chmod 755 /system/bin/usbhub_init
 
     #Remove SUID bit for iproute2 ip tool
     chmod 0755 /system/bin/ip
@@ -183,7 +183,7 @@ on post-fs-data
     mkdir /data/misc/wifi/sockets 0770 wifi wifi
     mkdir /data/misc/wifi/wpa_supplicant 0770 wifi wifi
     mkdir /data/misc/dhcp 0770 dhcp dhcp
-#    chown dhcp dhcp /data/misc/dhcp
+    chown dhcp dhcp /data/misc/dhcp
 # CONFIG_LGE_WLAN_PATCH
 # to observe dnsmasq.leases file for dhcp information of soft ap.
     chown dhcp system /data/misc/dhcp
@@ -273,13 +273,12 @@ on post-fs-data
 
 # Export GPIO56 for fusion targets to enable/disable hub
 service usbhub_init /system/bin/usbhub_init
-   class late_start
+   class main
    user root
-   disabled
    oneshot
 
-#on property:ro.board.platform=msm7630_fusion
-#    start usbhub_init
+on property:ro.board.platform=msm7630_fusion
+start usbhub_init
 
 on property:init.svc.wpa_supplicant=stopped
     stop dhcpcd
@@ -287,7 +286,7 @@ on property:init.svc.wpa_supplicant=stopped
 on property:bluetooth.isEnabled=true
     start btwlancoex
     start amp_load
-    write /sys/class/bluetooth/hci0/idle_timeout 7000
+    write /sys/class/bluetooth/hci0/idle_timeout 0
 
 on property:bluetooth.isEnabled=false
     start amp_unload
@@ -306,13 +305,12 @@ on property:vold.decrypt=trigger_restart_framework
     start qcom-c_main-sh
 
 service cnd /system/bin/cnd
-    class late_start
+    class main
     socket cnd stream 666 root radio
 
 service rmt_storage /system/bin/rmt_storage /dev/block/mmcblk0p10 /dev/block/mmcblk0p11 /dev/block/mmcblk0p17
     class core
     user root
-    disabled
 
 on property:ro.emmc=1
     start rmt_storage
@@ -326,16 +324,13 @@ on boot
 	write /sys/class/rfkill/rfkill1/state 0
 	write /sys/class/rfkill/rfkill2/state 0
 
-#service hciattach /system/bin/sh /system/etc/init.qcom.bt.sh
-#service hciattach /system/bin/brcm_patchram_plus -d -enable_hci --no2bytes --enable_lpm \
-#	--tosleep 50000 --baudrate 4000000 --use_baudrate_for_download --patchram /system/bin/BCM4334B0_002.001.013.0079.0082.hcd /dev/ttyHS0
-#service hciattach /system/bin/brcm_patchram_plus --enable_hci --scopcm=0,4,0,0,0,0,0,3,3,0 --no2bytes \
-#    --baudrate 4000000 --patchram /system/bin/BCM4334B0_002.001.013.0271.0333.hcd  /dev/ttyHS0
-#    class late_start
-#    user bluetooth
-#    group qcom_oncrpc bluetooth net_bt_admin system
-#    disabled
-#    oneshot
+service hciattach /system/bin/sh /system/etc/init.qcom.bt.sh
+service hciattach /system/bin/brcm_patchram_plus -d -enable_hci --no2bytes --enable_lpm \ --tosleep 50000 --baudrate 4000000 --use_baudrate_for_download --patchram /system/bin/BCM4334B0_002.001.013.0079.0082.hcd /dev/ttyHS0
+service hciattach /system/bin/brcm_patchram_plus --enable_hci --scopcm=0,4,0,0,0,0,0,3,3,0 --no2bytes \ --baudrate 4000000 --patchram /system/bin/BCM4334B0_002.001.013.0271.0333.hcd  /dev/ttyHS0
+class main
+user bluetooth
+group qcom_oncrpc bluetooth net_bt_admin system
+oneshot
 #END: 0019632 chanha.park@lge.com 2012-05-31
 
 #BEGIN: 0019636 chanha.park@lge.com 2012-06-11
@@ -343,7 +338,6 @@ on boot
 service btld /system/bin/logwrapper /system/bin/btld -lpm 1 -hb 4000000
     user root
     group bluetooth net_bt_admin
-    disabled
     oneshot 
 
 service bluetoothd /system/bin/logwrapper /system/bin/bluetoothd -d -n
@@ -352,87 +346,74 @@ service bluetoothd /system/bin/logwrapper /system/bin/bluetoothd -d -n
     socket dbus_bluetooth stream 660 bluetooth bluetooth
 # init.rc does not yet support applying capabilities, so run as root and
 # let bluetoothd drop uid to bluetooth with the right linux capabilities
-    group bluetooth net_bt_admin misc
-    disabled  
+    group bluetooth net_bt_admin misc  
 
 # Bluetooth PAN Enable
 # dhcp service for pan-nap/pan-u     
 service dhcpcd_brcm-pan /system/bin/dhcpcd -ABKL
 	class main
-	disabled
 	oneshot
 
 service iprenew_brcm-pan /system/bin/dhcpcd -n
 	class main
-	disabled
 	oneshot    
 #END: 0019636 chanha.park@lge.com 2012-06-11
 
 
 
 # +s LGBT_COMMON_FUNCTION_DUN_DISABLE
-#service bt-dun /system/bin/dun-server /dev/smd7 /dev/rfcomm0
-#    class late_start
-#    disabled
-#    oneshot
+service bt-dun /system/bin/dun-server /dev/smd7 /dev/rfcomm0
+class main
+oneshot
 
-#service dund /system/bin/sdptool add --channel=1 DUN
-#    class late_start
-#    user bluetooth
-#    group bluetooth net_bt_admin
-#    disabled
-#   oneshot
+service dund /system/bin/sdptool add --channel=1 DUN
+class main
+user bluetooth
+group bluetooth net_bt_admin
+oneshot
 # +e LGBT_COMMON_FUNCTION_DUN_DISABLE
 
 # +s LGBT_COMMON_FUNCTION_SAP_DISABLE
-#service bt-sap /system/bin/sapd 15
-#    class late_start
-#    disabled
-#    oneshot
+service bt-sap /system/bin/sapd 15
+class main
+oneshot
 
-#service sapd /system/bin/sdptool add --channel=15 SAP
-#    class late_start
-#    user bluetooth
-#    group bluetooth net_bt_admin
-#    disabled
-#    oneshot
+service sapd /system/bin/sdptool add --channel=15 SAP
+class main
+user bluetooth
+group bluetooth net_bt_admin
+oneshot
 # +e LGBT_COMMON_FUNCTION_SAP_DISABLE
 
 
 service bridgemgrd /system/bin/bridgemgrd
-    class late_start
+    class main
     user radio
     group radio
-    disabled
 
 service port-bridge /system/bin/port-bridge /dev/smd0 /dev/ttyGS0
-    class late_start
+    class main
     user system
     group system inet
-    disabled
 
 service qmiproxy /system/bin/qmiproxy
     class core
     user radio
     group radio
-#    disabled
 
 # QMUX must be in multiple groups to support external process connections
 service qmuxd /system/bin/qmuxd
     class core
     user radio
     group radio audio bluetooth gps
-#    disabled
 
 service netmgrd /system/bin/netmgrd
     class core
-#    disabled
 
 service sensors /system/bin/sensors.qcom
-    class late_start
+    class main
     user root
     group root
-    disabled
 
 on property:ro.use_data_netmgrd=false
     # netmgr not supported on specific target
@@ -444,109 +425,92 @@ on property:ro.data.large_tcp_window_size=true
     write /proc/sys/net/ipv4/tcp_adv_win_scale  1
 
 service btwlancoex /system/bin/sh /system/etc/init.qcom.coex.sh
-    class late_start
+    class main
     user bluetooth
     group bluetooth net_bt_admin inet net_admin net_raw
-    disabled
     oneshot
 
 service amp_init /system/bin/amploader -i
-    class late_start
+    class main
     user root
-    disabled
     oneshot
 
 service amp_load /system/bin/amploader -l 7000
-    class late_start
+    class main
     user root
-    disabled
     oneshot
 
 service amp_unload /system/bin/amploader -u
-    class late_start
+    class main
     user root
-    disabled
     oneshot
 service wpa_supplicant /system/bin/logwrapper /system/bin/wpa_supplicant -Dnl80211
-    class late_start
-#    user root
+    class main
+    user root
     group wifi inet
-    disabled
     oneshot
 #LGE_CHANGE_S, 2012-02-07, enabling AUTO IP and not enabling ARP option 
 #service dhcpcd_wlan0 /system/bin/dhcpcd -BKLG
 service dhcpcd_wlan0 /system/bin/dhcpcd -ABKG 
-    class late_start
-    disabled
+    class main
     oneshot
 
 service dhcpcd_p2p /system/bin/dhcpcd -BKLG
-    class late_start
-    disabled
+    class main
     oneshot
 
 #neo-wifi@lge.com : K-Option is added.
 service iprenew_wlan0 /system/bin/dhcpcd -nK
-    class late_start
-    disabled
+    class main
     oneshot
 
 service iprenew_p2p /system/bin/dhcpcd -n p2p
-    class late_start
-    disabled
+    class main
     oneshot
 
 service dhcpcd_bnep0 /system/bin/dhcpcd -BKLG
-    disabled
     oneshot
 
 service wiperiface /system/bin/wiperiface
-    class late_start
+    class main
     user gps
     group gps qcom_oncrpc net_raw
     oneshot
 
 service gpsone_daemon /system/bin/gpsone_daemon
-    class late_start
+    class main
     user gps
     group gps qcom_oncrpc inet net_raw
-    disabled
 
 service quipc_igsn /system/bin/quipc_igsn
-    class late_start
+    class main
     user gps
     group inet gps
-    disabled
 
 service quipc_main /system/bin/quipc_main
-    class late_start
+    class main
     user gps
     group gps net_admin wifi inet
-    disabled
 
 service location_mq /system/bin/location-mq
-    class late_start
+    class main
     user gps
     group gps
-    disabled
 
 service xtwifi_inet /system/bin/xtwifi-inet-agent
-    class late_start
+    class main
     user gps
     group inet gps
-    disabled
 
 service xtwifi_client /system/bin/xtwifi-client
-    class late_start
+    class main
     user gps
     group net_admin wifi inet gps
-    disabled
 
 service fm_dl /system/bin/sh /system/etc/init.qcom.fm.sh
-    class late_start
+    class main
     user root
     group system qcom_oncrpc
-    disabled
     oneshot
 
 on property:crypto.driver.load=1
@@ -558,9 +522,8 @@ on property:crypto.driver.load=0
      exec /system/bin/rmmod qce.ko
 
 service drmdiag /system/bin/drmdiagapp
-    class late_start
+    class main
      user root
-     disabled
      oneshot
 
 on property:drmdiag.load=1
@@ -570,67 +533,62 @@ on property:drmdiag.load=0
     stop drmdiag
 
 service qcom-sh /system/bin/sh /init.qcom.sh
-    class late_start
+    class main
     user root
     oneshot
 
 service qcom-post-boot /system/bin/sh /system/etc/init.qcom.post_boot.sh
-    class late_start
+    class main
     user root
-    disabled
     oneshot
 
 # 20120702, sangheon.shim@lge.com. Remove QCom Wifi (replace BRCM4334)
-#service qcom-wifi /system/bin/sh /system/etc/init.qcom.wifi.sh
-#    class late_start
-#    oneshot
+service qcom-wifi /system/bin/sh /system/etc/init.qcom.wifi.sh
+class main
+oneshot
 
 on property:sys.boot_completed=1
     start qcom-post-boot
 
 service atfwd /system/bin/ATFWD-daemon
-    class late_start
+    class main
     user system
     group system radio
     onrestart /system/bin/log -t RIL-ATFWD -p w "ATFWD daemon restarted"
 
 service hdmid /system/bin/hdmid
-    class late_start
+    class main
 # LGE_CHANGE_S, [2012-03-01], jongyeol.yang@lge.com, change hdmid permission to "system"
-#   socket hdmid stream 0660 root system graphics
+socket hdmid stream 0660 root system graphics
     user system
     group system graphics
     socket hdmid stream 0660 system system
 # LGE_CHANGE_E, [2012-03-01], jongyeol.yang@lge.com, change hdmid permission to "system"
-    disabled
 
 service ppd /system/bin/mm-pp-daemon
-    class late_start
+    class main
     user system
     socket pps stream 0660 system system graphics
     group system graphics
 
 service hostapd /system/bin/hostapd -dddd /data/hostapd/hostapd.conf
-    class late_start
+    class main
     user root
     group root
     oneshot
-    disabled
 
 service ds_fmc_appd /system/bin/ds_fmc_appd -p "rmnet0" -D
-    class late_start
+    class main
     group radio wifi inet
-    disabled
     oneshot
 
 on property:persist.data.ds_fmc_app.mode=1
     start ds_fmc_appd
 
 service ims_regmanager /system/bin/exe-ims-regmanagerprocessnative
-    class late_start
+    class main
     user system
     group qcom_oncrpc net_bt_admin inet radio wifi
-    disabled
 
 on property:persist.ims.regmanager.mode=1
     start ims_regmanager
@@ -640,11 +598,10 @@ on property:ro.data.large_tcp_window_size=true
     write /proc/sys/net/ipv4/tcp_adv_win_scale  1
 
 service time_daemon /system/bin/time_daemon
-    class late_start
+    class main
     user root
     group root
     oneshot
-    disabled
 
 on property:persist.timed.enable=true
     start time_daemon
@@ -652,25 +609,22 @@ on property:persist.timed.enable=true
 service battery_monitor /system/bin/battery_monitor
     user system
     group system
-    disabled
 
 service ril-daemon1 /system/bin/rild -c 1
     class main
     socket rild1 stream 660 root radio
     socket rild-debug1 stream 660 radio system
     user root
-    disabled
     group radio cache inet misc audio sdcard_rw qcom_oncrpc diag
 
 service profiler_daemon /system/bin/profiler_daemon
-    class late_start
+    class main
     user root
     group root
-    disabled
 
 # LGE_CHANGE_S, 20111226, jin.park@lge.com, Mobile DM Router
 service lg_dm_router /system/bin/lg_dm_router
-    class late_start
+    class main
     user system
     group system
     socket Full.DM.port stream 660 system system
@@ -679,32 +633,32 @@ service lg_dm_router /system/bin/lg_dm_router
  
 #LGE_CHANGE_S 2012.04 lg-msp@lge.com MTS TEAM  
 service mtsd /system/bin/mtsd  
-    class late_start  
+    class main
     oneshot  
     socket mtsd.port stream 660 system system  
   
 service mtsd_main /system/bin/mtsd_logcat_main
-    class late_start
+    class main
     oneshot
 
 service mtsd_events /system/bin/mtsd_logcat_events  
-    class late_start  
+    class main
     oneshot  
   
 service mtsd_radio /system/bin/mtsd_logcat_radio  
-    class late_start  
+    class main
     oneshot  
   
 service mtsd_system /system/bin/mtsd_logcat_system  
-    class late_start  
+    class main
     oneshot  
   
 service mtsd_fmgr /system/bin/mtsd_file_manager  
-    class late_start  
+    class main
     oneshot  
   
 service mtsd_hist /system/bin/mtsd_logcat_filter  
-    class late_start  
+    class main
     oneshot  
 #LGE_CHANGE_E 2012.04 lg-msp@lge.com MTS TEAM  
 
@@ -722,17 +676,15 @@ service mtsd_hist /system/bin/mtsd_logcat_filter
 service hcidump /system/bin/sh /system/etc/hcidump.sh
     user bluetooth
     group bluetooth system net_bt_admin net_admin
-    disabled
     oneshot
 
 service charger /charger
     class charger
 
 service ssr_diag /system/bin/ssr_diag
-    class late_start
+    class main
     user system
     group system
-    disabled
 
 # Limit to device reset (1) and independent SSR (3)
 on property:persist.sys.ssr.restart_level=1
@@ -745,7 +697,6 @@ on property:persist.sys.ssr.restart_level=3
 service hciattach_dut /system/bin/sh /system/etc/init.lge_dut.bt.sh
     user bluetooth
     group qcom_oncrpc bluetooth net_bt_admin
-    disabled
     oneshot
 
 
@@ -755,31 +706,29 @@ service hciattach_dut /system/bin/sh /system/etc/init.lge_dut.bt.sh
 #
 # CONFIG_LGE_WLAN_QCOM_PATCH
 # 2012.07.06 real-wifi@lge.com[wo0gi] block the code because of qct patch [START]
-#service ftm_ptt /system/bin/ftm_ptt -d
-#    class late_start
-#    user root
-#    group radio system
-#    disabled
-#    oneshot
+service ftm_ptt /system/bin/ftm_ptt -d
+class main
+user root
+group radio system
+oneshot
 
-#on property:hw.ftm_ptt_start=1
-#    start ftm_ptt
+on property:hw.ftm_ptt_start=1
+start ftm_ptt
 
-#on property:hw.ftm_ptt_start=0
-#    stop ftm_ptt
+on property:hw.ftm_ptt_start=0
+stop ftm_ptt
 # 2012.07.06 real-wifi@lge.com[wo0gi] block the code because of qct patch [END]
 
 # 20120702, sangheon.shim@lge.com. Remove QCom Wifi (replace BRCM4334)
-#service wlan-on-off /system/bin/sh /system/etc/init.wlan-on-off.sh
-#    class late_start
-#    user root
-#    disabled
-#    oneshot
+service wlan-on-off /system/bin/sh /system/etc/init.wlan-on-off.sh
+class main
+user root
+oneshot
 
 # 20120702, sangheon.shim@lge.com. Remove QCom Wifi (replace BRCM4334)
 # Workaround to resolve WCNSS power problem in Kernel Mode booting
-#on property:init.svc.qcom-wifi=stopped
-#    start wlan-on-off
+on property:init.svc.qcom-wifi=stopped
+start wlan-on-off
 # LGE_CHANGE_E, 20110725, real-wifi@lge.com
 
 
@@ -794,8 +743,7 @@ service spritebud /system/xbin/spritebud
 # ------------------------------------
 # LGE_CHANGE_S, 20120108, HiddenMenu Log_service seungin.choi@lge.com
 service logcat-main /system/bin/logcat -v time -b main -f /data/logger/main.log -n 4 -r 8192
-	class late_start
-	disabled
+	class main
 	oneshot
 
 on property:persist.service.main.enable=1
@@ -805,8 +753,7 @@ on property:persist.service.main.enable=0
 	stop logcat-main
 
 service logcat-system /system/bin/logcat -v time -b system -f /data/logger/system.log -n 4 -r 4096
-	class late_start
-	disabled
+	class main
 	oneshot
 
 on property:persist.service.system.enable=1
@@ -815,12 +762,11 @@ on property:persist.service.system.enable=1
 # [START_LGE_HiddenMenu] , ADD, sungkyoung.kim ,2012-03-23 , change command from "start" to "stop"
 on property:persist.service.system.enable=0
 	stop logcat-system
-#	start logcat-system
+start logcat-system
 # [END_LGE_HiddenMenu] , ADD, sungkyoung.kim ,2012-03-23 , change command from "start" to "stop"
 
 service logcat-radio /system/bin/logcat -v time -b radio -f /data/logger/radio.log -n 9 -r 4096
-	class late_start
-	disabled
+	class main
 	oneshot
 
 on property:persist.service.radio.enable=1
@@ -830,8 +776,7 @@ on property:persist.service.radio.enable=0
 	stop logcat-radio
 
 service logcat-events /system/bin/logcat -v time -b events -f /data/logger/events.log -n 4 -r 4096
-	class late_start
-	disabled
+	class main
 	oneshot
 
 on property:persist.service.events.enable=1
@@ -841,8 +786,7 @@ on property:persist.service.events.enable=0
 	stop logcat-events
 
 service logcat-kernel /system/bin/sh /system/etc/save_kernel_log.sh
-    class late_start
-	disabled
+    class main
 	oneshot
 
 on property:persist.service.kernel.enable=1
@@ -853,8 +797,7 @@ on property:persist.service.kernel.enable=0
 
 # LGE_CHANGE_S, [LGE_DATA][TCP_DUMP], gilchan.park@lge.com, 2012-02-16
 service logging_packet /system/xbin/tcpdump -i any -C 4 -W 10 -s 0 -w /mnt/sdcard/log/packet.pcap
-	class late_start
-	disabled
+	class main
 	oneshot
 
 on property:persist.service.logging_packet=1
@@ -867,7 +810,6 @@ on property:persist.service.logging_packet=0
 # LGE_CHANGE_S, [LGE][framework] packet log service for hiddenmenu, will83.lee@lge.com, 2012-09-05 
 service log-packet /system/xbin/tcpdump -i any -C 4 -W 10 -Z root -s 0 -w /data/logger/packet.pcap
     class main
-    disabled
     oneshot
 
 on property:persist.service.packet.enable=1
@@ -879,7 +821,7 @@ on property:persist.service.packet.enable=0
 
 #LGE_CHANGE_S seungin.choi@lge.com, HiddenMenu, Loading LogService Properties
 service cur_prop_val /system/bin/sh /data/logger/LogPropValue.sh
-	class late_start
+	class main
 	user system
 	oneshot
 #LGE_CHANGE_E, seungin.choi@lge.com, HiddenMenu, Loading LogService Properties

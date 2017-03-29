@@ -4,14 +4,13 @@ import /init.grand.rc
 on init
 #	mkdir /mnt/external_sd 0000 system system # FEATURE_SDCARD_ENCRYPTION
 # Create filesystems if necessary.
-    exec /sbin/setup_fs \
-        /dev/block/platform/msm_sdcc.1/by-name/userdata \
-        /dev/block/platform/msm_sdcc.1/by-name/cache \
-        /dev/block/platform/msm_sdcc.1/by-name/drm \
-        /dev/block/platform/msm_sdcc.1/by-name/mpt \
-        /dev/block/platform/msm_sdcc.1/by-name/sns \
-        /dev/block/platform/msm_sdcc.1/by-name/fotapkg \
-        no_reboot
+    exec /sbin/setup_fs
+        /dev/block/platform/msm_sdcc.1/by-name/userdata
+        /dev/block/platform/msm_sdcc.1/by-name/cache
+        /dev/block/platform/msm_sdcc.1/by-name/drm
+        /dev/block/platform/msm_sdcc.1/by-name/mpt
+        /dev/block/platform/msm_sdcc.1/by-name/sns
+        /dev/block/platform/msm_sdcc.1/by-name/fotapkg
 	start bootlogo
 
 on boot-pause
@@ -20,12 +19,11 @@ on boot-pause
 
 on post-fs-data
     setprop ro.crypto.keyfile.userdata /dev/block/platform/msm_sdcc.1/by-name/encrypt
-#    chown media_rw media_rw /mnt/external_sd # FEATURE_SDCARD_ENCRYPTION
-#    symlink /data/media/external_sd /mnt/external_sd # FEATURE_SDCARD_ENCRYPTION
-#    chmod 0755 /system/bin/ssbd
-# service ssbd /system/bin/ssbd # FEATURE_SDCARD_ENCRYPTION
-#    class main
-#    disabled
+    chown media_rw media_rw /mnt/external_sd # FEATURE_SDCARD_ENCRYPTION
+    symlink /data/media/external_sd /mnt/external_sd # FEATURE_SDCARD_ENCRYPTION
+    chmod 0755 /system/bin/ssbd
+service ssbd /system/bin/ssbd # FEATURE_SDCARD_ENCRYPTION
+class main
 
 on boot
     chmod 0660 /dev/ttyGS0
@@ -63,7 +61,6 @@ on boot
 service ftm_ptt /system/bin/ftm_ptt -d
     user root
     group radio system 
-    disabled
 #[LGE_UPDATE_S] DMS_SYSTEM dms-fota@lge.com 2012/02/18
 on emmc-fs
     mkdir /fotapkg 0771 system system
@@ -83,15 +80,14 @@ service bootlogo /sbin/bootlogo_l1m
 	class main
 	user root
 	group root
-	disabled
 	oneshot
 
 on property:ro.build.type=user
     write /sys/module/subsystem_restart/parameters/restart_level 3
     write /sys/module/lge_handle_panic/parameters/hreset_enable 1
 # FEATURE_SDCARD_ENCRYPTION
-# on property:ssbd.enable=1
-#	start ssbd
-# on property:ssbd.enable=0
-#	stop ssbd
+on property:ssbd.enable=1
+start ssbd
+on property:ssbd.enable=0
+stop ssbd
 

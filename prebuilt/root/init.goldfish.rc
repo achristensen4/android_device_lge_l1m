@@ -7,12 +7,6 @@ on boot
     setprop ro.build.product generic
     setprop ro.product.device generic
 
-# fake some battery state
-    setprop status.battery.state Slow
-    setprop status.battery.level 5
-    setprop status.battery.level_raw  50
-    setprop status.battery.level_scale 9
-
 # disable some daemons the emulator doesn't want
     stop dund
     stop akmd

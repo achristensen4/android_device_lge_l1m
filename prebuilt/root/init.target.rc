@@ -35,13 +35,13 @@ import init.lge.usb.rc
 
 #start camera server as daemon
 service qcamerasvr /system/bin/mm-qcamera-daemon
-        class late_start
+        class main
         user system
         group system camera inet
 
 #start GNSS/Sensor interface daemon
 service gsiff_daemon /system/bin/gsiff_daemon
-    class late_start
+    class main
     user system
     group qcom_oncrpc
 
@@ -88,8 +88,8 @@ on fs
 #LGE_CHANGE_S, [jiseok.kang], 2011-02-10, NON-HLOS image file permission
    mount vfat /dev/block/mmcblk0p1 /firmware ro umask=002 shortname=lower
 #LGE_CHANGE_E, [jiseok.kang], 2011-02-10, NON-HLOS image file permission
-#   exec /system/bin/sh /system/etc/init.qcom.modem_links.sh
-#   exec /system/bin/sh /system/etc/init.qcom.mdm_links.sh
+exec /system/bin/sh /system/etc/init.qcom.modem_links.sh
+exec /system/bin/sh /system/etc/init.qcom.mdm_links.sh
 
 # LGE_CHANGE For MISC
 # vibrator
@@ -98,11 +98,11 @@ on fs
 # LGE_CHANGE For MISC
 
 on post-fs
-#   mount ext4 /dev/block/platform/msm_sdcc.1/by-name/system /system ro remount barrier=1
+#   mount ext4 /dev/block/platform/msm_sdcc.1/by-name/system /system rw remount barrier=1
 
 # NFC Feature
    chmod 0666 /dev/pn544
-   setprop ro.crypto.fuse_sdcard true
+   setprop ro.crypto.fuse_sdcard false
 
 on post-fs-data
 # on post-fs-data //already defined MTP
@@ -154,7 +154,7 @@ on post-fs-data
 # LGE_CHANGE, LGE_UPDATE_S
 # The support of external sd
 # 2012-03-05 G1-FS@lge.com
-#    mkdir /data/media/external_sd 0000 system system
+mkdir /data/media/external_sd 0000 system system
 # LGE_UPDATE_E
 
 # LGE_CHANGE For MLT
@@ -165,7 +165,7 @@ on post-fs-data
 # daemon will drop to user/group system/media_rw after initializing
 # underlying files in /data/media will be created with user and group media_rw (1023)
 service sdcard /system/bin/sdcard /data/media 1023 1023
-    class late_start
+    class main
 
 on boot
    symlink /mnt/external_sd /mnt/sdcard/external_sd
@@ -200,8 +200,8 @@ on boot
   chmod 0660 /sys/devices/platform/lge-msm8960-qfprom/qfusing
 
 # LGE_CHANGE_S, remove debugfs mounting for CTS test
-# mount debugfs
-# mount debugfs /sys/kernel/debug /sys/kernel/debug
+mount debugfs
+mount debugfs /sys/kernel/debug /sys/kernel/debug
 
 service thermald /system/bin/thermald
    class main
@@ -210,10 +210,9 @@ service thermald /system/bin/thermald
 
 service mpdecision /system/bin/mpdecision --no_sleep --avg_comp
    user root
-   disabled
 
 service qseecomd /system/bin/qseecomd
-   class late_start
+   class main
    user system
    group system
 
@@ -221,7 +220,6 @@ service qseecomd /system/bin/qseecomd
 service atd /system/bin/atd /dev/ttyGS0 /dev/smd0
    class main
    socket atd stream 0660 system inet
-   disabled
 
 on property:ro.baseband="msm"
    start atd
